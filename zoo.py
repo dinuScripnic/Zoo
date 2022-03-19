@@ -161,9 +161,9 @@ class Zoo:
     def feeding(self):
         feeding_plan = {}
         for animal in self.animals:
-            try:
+            if animal.caretaker:
                 caretaker = self.get_caretaker(animal.caretaker)
-            except ValueError:
+            else:
                 caretaker = self.caretakers[random.randrange(0, len(self.caretakers))]
             if len(animal.feeding_record) > 0:
                 last_one = animal.feeding_record[-1]
