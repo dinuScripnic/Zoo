@@ -90,6 +90,8 @@ class FeedAnimal(Resource):
 @zooma_api.route('/animals')
 class AllAnimals(Resource):
     def get(self):
+        if not my_zoo.animals:
+            return jsonify('No animals detected')
         return jsonify(my_zoo.animals)
 
 
