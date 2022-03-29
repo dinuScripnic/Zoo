@@ -12,12 +12,30 @@ class Zoo:
     # all functions that are related to animals
 
     def add_animal(self, animal):
+        enclosure = self.get_enclosure(animal.enclosure)
+        caretaker = self.get_caretaker(animal.caretaker)
+        if enclosure:
+            enclosure.animals.append(animal)
+        if caretaker:
+            caretaker.add_animal(animal)
         self.animals.append(animal)
 
     def remove_animal(self, animal):
+        enclosure = self.get_enclosure(animal.enclosure)
+        caretaker = self.get_caretaker(animal.caretaker)
+        if enclosure:
+            enclosure.animals.remove(animal)
+        if caretaker:
+            caretaker.animals.remove(animal)
         self.animals.remove(animal)
 
     def animal_died(self, animal):
+        enclosure = self.get_enclosure(animal.enclosure)
+        caretaker = self.get_caretaker(animal.caretaker)
+        if enclosure:
+            enclosure.animals.remove(animal)
+        if caretaker:
+            caretaker.animals.remove(animal)
         self.dead_animals.append(animal)
         self.animals.remove(animal)
 
@@ -26,6 +44,13 @@ class Zoo:
             if animal.animal_id == animal_id:
                 return animal
 
+    def animal_home(self, animal, new_enclosure):
+        if animal.enclosure:
+            present_enclosure = self.get_enclosure(animal.enclosure)
+            present_enclosure.animals.remove(animal)
+        animal.enclosure = new_enclosure.enclosure_id
+        new_enclosure.animals.append(animal)
+
     def animals_statistics(self):
         # total animal per species
         animal_per_specie = {}
@@ -33,7 +58,7 @@ class Zoo:
         if not self.animals:
             return 'No animals detected'
         for animal in self.animals:
-               animals.append(animal.species)
+            animals.append(animal.species)
         for animal in animals:
             animal_per_specie[animal] = animals.count(animal)
             # Average number per enclosure

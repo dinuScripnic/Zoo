@@ -64,14 +64,8 @@ class AnimalID(Resource):
     
     def delete(self, animal_id):
         targeted_animal = my_zoo.get_animal(animal_id)
-        enclosure = my_zoo.get_enclosure(targeted_animal.enclosure)
-        caretaker = my_zoo.get_caretaker(targeted_animal.caretaker)
         if not targeted_animal:
             return jsonify(f"Animal with ID {animal_id} was not found")
-        if enclosure:
-            enclosure.animals.remove(targeted_animal)
-        if caretaker:
-            caretaker.animals.remove(targeted_animal)
         my_zoo.remove_animal(targeted_animal)
         return jsonify(f"Animal with ID {animal_id} was removed")
 
@@ -109,23 +103,14 @@ class VetAnimal(Resource):
 class HomeAnimal(Resource):
     @zooma_api.doc(parser=enclosure)
     def post(self, animal_id):
-        enclosure_id = enclosure.parse_args()['enclosure_id']
         targeted_animal = my_zoo.get_animal(animal_id)
-        targeted_enclosure = my_zoo.get_enclosure(enclosure_id)
+        targeted_enclosure = my_zoo.get_enclosure(enclosure.parse_args()['enclosure_id'])
         if not targeted_animal:
             return jsonify(f'Animal with ID {animal_id} was not found')
         if not targeted_enclosure:
-            return jsonify(f'Enclosure with ID {enclosure_id} was not found')
-        if not targeted_animal.enclosure:
-            targeted_animal.enclosure = enclosure_id
-            targeted_enclosure.animals.append(targeted_animal)
-            return jsonify(targeted_animal)
-        else:
-            present_enclosure = my_zoo.get_enclosure(targeted_animal.enclosure)
-            present_enclosure.animals.remove(targeted_animal)
-            targeted_animal.enclosure = targeted_enclosure.enclosure_id
-            targeted_enclosure.animals.append(targeted_animal)
-            return jsonify(targeted_animal)
+            return jsonify(f'Enclosure with ID {targeted_enclosure.enclosure_id} was not found')
+        my_zoo.animal_home(targeted_animal, targeted_enclosure)
+        return jsonify(targeted_animal)
 
 
 @zooma_api.route('/animal/birth')
@@ -136,16 +121,10 @@ class AnimalBirth(Resource):
         args = animal.parse_args()
         animal_id = args['animal_id']
         mother = my_zoo.get_animal(animal_id)
-        enclosure = my_zoo.get_enclosure(mother.enclosure)
-        caretaker = my_zoo.get_caretaker(mother.caretaker)
         if not mother:
             return jsonify(f"Animal with ID {animal_id} was not found")
         child = mother.birth()
         my_zoo.add_animal(child)
-        if enclosure:
-            enclosure.animals.append(child)
-        if caretaker:
-            caretaker.add_animal(child)
         return jsonify(child)
 # animals death
 
@@ -158,14 +137,8 @@ class AnimalDie(Resource):
         args = animal.parse_args()
         animal_id = args['animal_id']
         targeted_animal = my_zoo.get_animal(animal_id)
-        enclosure = my_zoo.get_enclosure(targeted_animal.enclosure)
-        caretaker = my_zoo.get_caretaker(targeted_animal.caretaker)
         if not targeted_animal:
             return jsonify(f"Animal with ID {animal_id} was not found")
-        if enclosure:
-            enclosure.animals.remove(targeted_animal)
-        if caretaker:
-            caretaker.animals.remove(targeted_animal)
         my_zoo.animal_died(targeted_animal)
         return jsonify(f"Animal with ID {animal_id} died. RIP. Always in our hearts (((")
 # animals stat
@@ -248,13 +221,12 @@ class CaretakerTakeCare(Resource):
     def post(self, caretaker_id, animal_id):
         targeted_animal = my_zoo.get_animal(animal_id)
         targeted_caretaker = my_zoo.get_caretaker(caretaker_id)
-        previous_caretaker = my_zoo.get_caretaker(targeted_animal.caretaker)
-        if previous_caretaker:
-            previous_caretaker.animals.remove(targeted_animal)
+        if targeted_animal.caretaker:
+            return jsonify('This animal is already taken care of.')
         if not targeted_caretaker:
-            return jsonify(f"Caretaker with ID {caretaker_id} was not found")
+            return jsonify(f"Caretaker with ID {caretaker_id} was not found.")
         if not targeted_animal:
-            return jsonify(f"Animal with ID {animal_id} was not found")
+            return jsonify(f"Animal with ID {animal_id} was not found.")
         targeted_caretaker.add_animal(targeted_animal)
         return jsonify(targeted_caretaker)
 
@@ -264,7 +236,7 @@ class AllAnimalsAtCaretaker(Resource):
     def get(self, caretaker_id):
         targeted_caretaker = my_zoo.get_caretaker(caretaker_id)
         if not targeted_caretaker:
-            return jsonify(f"Caretaker with ID {caretaker_id} was not found")
+            return jsonify(f"Caretaker with ID {caretaker_id} was not found.")
         return jsonify(targeted_caretaker.animals)
 
 
@@ -281,9 +253,9 @@ class CaretakerId(Resource):
     def delete(self, caretaker_id):
         targeted_caretaker = my_zoo.get_caretaker(caretaker_id)
         if not targeted_caretaker:
-            return jsonify(f"Caretaker with ID {caretaker_id} was not found")
+            return jsonify(f"Caretaker with ID {caretaker_id} was not found.")
         my_zoo.remove_caretaker(targeted_caretaker)
-        return jsonify(f"Caretaker with ID {caretaker_id} was removed")
+        return jsonify(f"Caretaker with ID {caretaker_id} was removed.")
 
 
 @zooma_api.route('/caretakers')
