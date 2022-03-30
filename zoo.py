@@ -61,7 +61,7 @@ class Zoo:
             animals.append(animal.species)
         for animal in animals:
             animal_per_specie[animal] = animals.count(animal)
-            # Average number per enclosure
+        # Average number per enclosure
         animals_per_enclosure = []
         for enclosure in self.enclosures:
             animals_per_enclosure.append(len(enclosure.animals))
