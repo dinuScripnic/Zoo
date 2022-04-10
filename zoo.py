@@ -75,7 +75,7 @@ class Zoo:
             animal_in_enclosure = []
             for animal in enclosure.animals:
                 animal_in_enclosure.append(animal.species)
-            if len(set(animal_in_enclosure)) != 1:
+            if len(set(animal_in_enclosure)) != 1 and len(set(animal_in_enclosure)) != 0:
                 animals_from_different_species += 1
         # available space per animal in enclosure
         available_space_in_enclosure = {}
@@ -148,9 +148,11 @@ class Zoo:
     def cleaning(self):
         cleaning_plan = {}
         for enclosure in self.enclosures:
+            if not self.caretakers:
+                return 'No workers to work. Add some.'
             person = random.randrange(0, len(self.caretakers))
             if len(enclosure.cleaning_record) > 0:
-                last_one = enclosure.cleaning_records[-1]
+                last_one = enclosure.cleaning_record[-1]
                 month = last_one.month
                 day = last_one.day
                 month_more = int(month)
@@ -189,6 +191,8 @@ class Zoo:
             if animal.caretaker:
                 caretaker = self.get_caretaker(animal.caretaker)
             else:
+                if not self.caretakers:
+                    return 'No caretakers to work, add some.'
                 caretaker = self.caretakers[random.randrange(0, len(self.caretakers))]
             if len(animal.feeding_record) > 0:
                 last_one = animal.feeding_record[-1]

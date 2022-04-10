@@ -221,12 +221,12 @@ class CaretakerTakeCare(Resource):
     def post(self, caretaker_id, animal_id):
         targeted_animal = my_zoo.get_animal(animal_id)
         targeted_caretaker = my_zoo.get_caretaker(caretaker_id)
+        if not targeted_animal:
+            return jsonify(f"Animal with ID {animal_id} was not found.")
         if targeted_animal.caretaker:
             return jsonify('This animal is already taken care of.')
         if not targeted_caretaker:
             return jsonify(f"Caretaker with ID {caretaker_id} was not found.")
-        if not targeted_animal:
-            return jsonify(f"Animal with ID {animal_id} was not found.")
         targeted_caretaker.add_animal(targeted_animal)
         return jsonify(targeted_caretaker)
 

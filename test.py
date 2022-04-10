@@ -48,7 +48,7 @@ class TestAddFunctions:
         assert len(zoo1.animals) == 2
         assert tiger1 in zoo1.animals
 
-    def test_add_enclosure(self):
+    def test_add_and_remove_enclosure(self):
         zoo1 = Zoo()
         initial_enclosures = len(zoo1.enclosures)
         enclosure1 = Enclosure('enc1', 150)
@@ -58,6 +58,9 @@ class TestAddFunctions:
         assert len(zoo1.enclosures) != initial_enclosures
         assert len(zoo1.enclosures) == 2
         assert enclosure2 in zoo1.enclosures
+        for enclosure in zoo1.enclosures:
+            zoo1.remove_enclosure(enclosure)
+            assert enclosure not in zoo1.enclosures
 
     def test_add_caretakers(self):
         zoo1 = Zoo()
@@ -156,6 +159,7 @@ class TestSerious:
 
 
 def test_ubertest(full_zoo):
+    # managing all stuff
     for animal in full_zoo.animals:
         caretaker = random.choice(full_zoo.caretakers)
         caretaker.add_animal(animal)
@@ -165,15 +169,16 @@ def test_ubertest(full_zoo):
         assert animal in caretaker.animals and animal in home.animals
     for i in range(random.randint(0, len(full_zoo.animals))):
         animal = random.choice(full_zoo.animals)
-        animal.feed().vet()
+        animal.feed()
+        animal.vet()
         assert animal.feeding_record is not [] and animal.medical_record is not []
-    # happy child
+    # happy
     mother = random.choice(full_zoo.animals)
     kid = mother.birth()
     full_zoo.add_animal(kid)
     enclosure = full_zoo.get_enclosure(mother.enclosure)
     caretaker = full_zoo.get_caretaker(mother.caretaker)
-    assert kid.common_name == mother.common_name and kid.species == mother.specie and kid.age == 0
+    assert kid.common_name == mother.common_name and kid.species == mother.species and kid.age == 0
     assert kid in enclosure.animals and kid in caretaker.animals
     # cleaning
     for i in range(random.randint(0, len(full_zoo.enclosures))):
@@ -187,3 +192,11 @@ def test_ubertest(full_zoo):
     assert poor_animal in full_zoo.dead_animals
     assert poor_animal not in full_zoo.get_enclosure(poor_animal.enclosure).animals
     assert poor_animal not in full_zoo.get_caretaker(poor_animal.caretaker).animals
+    cleaning_plan = full_zoo.cleaning()
+    for enclosure in full_zoo.enclosures:
+        enclosure.enclosure_id in cleaning_plan.keys()
+    medical_plan = full_zoo.medical()
+    feeding_plan = full_zoo.feeding()
+    for animal in full_zoo.animals:
+        animal.animal_id in medical_plan.keys()
+        animal.animal_id in feeding_plan.keys()
